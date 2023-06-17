@@ -1,15 +1,18 @@
-provider "aws" {
-  region = "eu-west-1"
+terraform {
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 3.27"
+    }
+    template = {
+      source  = "hashicorp/template"
+      version = "~> 2.2"
+    }
+  }
 }
 
-resource "null_resource" "archive" {
-  triggers = {
-    always_run = "${timestamp()}"
-  }
-
-  provisioner "local-exec" {
-    command = "zip -r my_repo.zip ."
-  }
+provider "aws" {
+  region = "eu-west-1" # your AWS region
 }
 
 resource "aws_s3_bucket" "b" {
@@ -22,38 +25,45 @@ resource "aws_s3_bucket" "b" {
   }
 }
 
+resource "null_resource" "archive" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
+
+  provisioner "local-exec" {
+    command = "zip -r my_repo.zip ."
+  }
+}
+
 resource "aws_s3_bucket_object" "object" {
+  depends_on = [null_resource.archive]
+
   bucket = aws_s3_bucket.b.bucket
   key    = "my_repo.zip"
   source = "my_repo.zip"
   acl    = "private"
 }
 
-
-
 resource "aws_security_group" "example" {
-  name        = "example"
-  description = "Example security group"
+  name        = "terraform_example"
+  description = "An example security group"
 
   ingress {
-    from_port   = 22
-    to_port     = 22
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port   = 80
-    to_port     = 80
-    protocol    = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  egress {
+    description = "Allow all inbound traffic"
     from_port   = 0
     to_port     = 0
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+data "aws_ami" "amazon_linux_2" {
+  most_recent = true
+  owners      = ["amazon"]
+
+  filter {
+    name   = "name"
+    values = ["amzn2-ami-hvm-*-x86_64-gp2"]
   }
 }
 
@@ -67,7 +77,6 @@ resource "aws_instance" "example" {
     Name = "terraform-example"
   }
 }
-
 data "template_file" "user_data" {
   template = <<-EOF
               #!/bin/bash
