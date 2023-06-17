@@ -16,11 +16,11 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "b" {
-  bucket = "my-tf-bucket"
+  bucket = "unique-bucket-name" # update this with your unique bucket name
   acl    = "private"
 
   tags = {
-    Name        = "My tf bucket"
+    Name        = "My bucket"
     Environment = "Dev"
   }
 }
@@ -45,7 +45,7 @@ resource "aws_s3_bucket_object" "object" {
 }
 
 resource "aws_security_group" "example" {
-  name        = "terraform_example_2"
+  name        = "terraform_example_3"
   description = "An example security group"
 
   ingress {
@@ -96,7 +96,7 @@ data "template_file" "user_data" {
               mkdir ~/app && cd ~/app
 
               # Download and unzip the archive from S3
-              aws s3 cp s3://my-bucket/my_repo.zip my_repo.zip
+              aws s3 cp s3://unique-bucket-name/my_repo.zip my_repo.zip
               unzip my_repo.zip
 
               # Install npm packages
