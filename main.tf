@@ -45,7 +45,7 @@ resource "aws_s3_bucket_object" "object" {
 }
 
 resource "aws_security_group" "example" {
-  name        = "terraform_example_5"
+  name        = "terraform_example_6"
   description = "An example security group"
 
   ingress {
@@ -80,6 +80,48 @@ resource "aws_instance" "example" {
 data "template_file" "user_data" {
   template = <<-EOF
               #!/bin/bash
-              touch /home/ec2-user/test.txt
+
+              set -e
+
+              echo "🚀 Starting setup..."
+
+              # Update system packages
+              echo "📦 Updating system packages..."
+              yum update -y
+              yum install -y unzip
+
+              # Install Node.js via NVM
+              echo "📥 Installing Node.js..."
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+              export NVM_DIR="/root/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm install node
+              export PATH="/root/.nvm/versions/node/$(nvm version)/bin:$PATH"
+
+              # Install the AWS CLI
+              echo "📥 Installing AWS CLI..."
+              curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
+              export PATH="$PATH:/usr/local/bin/aws"
+
+              # Create app directory
+              echo "📂 Creating app directory..."
+              mkdir /home/ec2-user/app && cd /home/ec2-user/app
+
+              # Download and unzip the archive from S3
+              echo "📥 Downloading and unzipping app from S3..."
+              aws s3 cp s3://unique-bucket-namezzyo12/my_repo.zip my_repo.zip
+              unzip my_repo.zip
+
+              # Install npm packages
+              echo "📥 Installing npm packages..."
+              npm install
+
+              # Start the app
+              echo "🚀 Starting the app..."
+              nohup node server.js > output.log &
+
+              echo "🎉 Setup complete!"
             EOF
 }
