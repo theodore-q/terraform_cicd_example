@@ -10,34 +10,13 @@ nvm install node
 mkdir ~/app && cd ~/app
 
 # Create package.json
-echo '{
-  "name": "hello-world",
-  "version": "1.0.0",
-  "description": "Node.js on AWS EC2 with Express",
-  "main": "server.js",
-  "scripts": {
-    "start": "node server.js"
-  },
-  "dependencies": {
-    "express": "^4.16.4"
-  }
-}' > package.json
+echo '${package_json}' > package.json
 
 # Install express
 npm install
 
 # Create server.js
-echo "const express = require('express')
-const app = express()
-const port = 3000
-
-app.get('/', (req, res) => {
-  res.send('Hello World!')
-})
-
-app.listen(port, () => {
-  console.log(`Server running at http://localhost:$${port}`)
-})" > server.js
+echo "${server_js}" > server.js
 
 # Start the app
 nohup node server.js > output.log &
