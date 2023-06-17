@@ -1,27 +1,29 @@
-#!/bin/bash
+data "template_file" "user_data" {
+  template = <<-EOF
+              #!/bin/bash
+              yum update -y
+              yum install -y unzip
+              curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+              export NVM_DIR="/root/.nvm"
+              [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+              nvm install node
 
-# Update and install necessary packages
-yum update -y
-curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.38.0/install.sh | bash
+              # Install the AWS CLI
+              curl "https://d1vvhvl2y92vvt.cloudfront.net/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+              unzip awscliv2.zip
+              sudo ./aws/install
 
-# Export NVM_DIR to make sure we're using the correct one
-export NVM_DIR="/root/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+              # Create app directory
+              mkdir ~/app && cd ~/app
 
-# Install node using nvm
-nvm install node
+              # Download and unzip the archive from S3
+              aws s3 cp s3://my-bucket/my_repo.zip my_repo.zip
+              unzip my_repo.zip
 
-# Create app directory
-mkdir ~/app && cd ~/app
+              # Install npm packages
+              npm install
 
-# Create package.json
-echo '${package_json}' > package.json
-
-# Install express
-npm install
-
-# Create server.js
-echo "${server_js}" > server.js
-
-# Start the app
-nohup node server.js > output.log &
+              # Start the app
+              nohup node server.js > output.log &
+            EOF
+}

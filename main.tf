@@ -2,14 +2,34 @@ provider "aws" {
   region = "eu-west-1"
 }
 
-data "template_file" "user_data" {
-  template = file("${path.module}/user_data.sh")
+resource "null_resource" "archive" {
+  triggers = {
+    always_run = "${timestamp()}"
+  }
 
-  vars = {
-    server_js    = file("${path.module}/server.js")
-    package_json = file("${path.module}/package.json")
+  provisioner "local-exec" {
+    command = "zip -r my_repo.zip ."
   }
 }
+
+resource "aws_s3_bucket" "b" {
+  bucket = "my-bucket"
+  acl    = "private"
+
+  tags = {
+    Name        = "My bucket"
+    Environment = "Dev"
+  }
+}
+
+resource "aws_s3_bucket_object" "object" {
+  bucket = aws_s3_bucket.b.bucket
+  key    = "my_repo.zip"
+  source = "my_repo.zip"
+  acl    = "private"
+}
+
+
 
 resource "aws_security_group" "example" {
   name        = "example"
