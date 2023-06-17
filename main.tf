@@ -16,11 +16,11 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "b" {
-  bucket = "my-bucket"
+  bucket = "my-tf-bucket"
   acl    = "private"
 
   tags = {
-    Name        = "My bucket"
+    Name        = "My tf bucket"
     Environment = "Dev"
   }
 }
@@ -45,7 +45,7 @@ resource "aws_s3_bucket_object" "object" {
 }
 
 resource "aws_security_group" "example" {
-  name        = "terraform_example"
+  name        = "terraform_example_2"
   description = "An example security group"
 
   ingress {
