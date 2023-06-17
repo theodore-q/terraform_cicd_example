@@ -16,7 +16,7 @@ provider "aws" {
 }
 
 resource "aws_s3_bucket" "b" {
-  bucket = "unique-bucket-namezzyo12" # update this with your unique bucket name
+  bucket = "unique-bucket-namezzyo123" # update this with your unique bucket name
   acl    = "private"
 
   tags = {
@@ -45,7 +45,7 @@ resource "aws_s3_bucket_object" "object" {
 }
 
 resource "aws_security_group" "example" {
-  name        = "terraform_example_4"
+  name        = "terraform_example_5"
   description = "An example security group"
 
   ingress {
